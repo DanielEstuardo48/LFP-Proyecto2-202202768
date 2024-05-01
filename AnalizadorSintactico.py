@@ -8,6 +8,13 @@ global instrucciones
 global lista_lexemas
 global lista_errores
 
+n_linea = 1
+n_columna = 1
+instrucciones = []
+lista_lexemas = []
+lista_errores = []
+
+
 def intruccion(cadena):
     global n_linea
     global n_columna
@@ -80,43 +87,48 @@ def armar_lexema(cadena):
 
 def operar():
     global lista_lexemas
-    global instrucciones
+    instrucciones = []
 
     while lista_lexemas:
         lexema = lista_lexemas.pop(0)
-        if lexema.operar(None) in ['CrearDB', 'EliminarDB','CrearColeccion']:
-            nombredb = lista_lexemas.pop(0)
-            igualdb = lista_lexemas.pop(0)
-            nuevadb = lista_lexemas.pop(0)
-            creardb2 = lista_lexemas.pop(0)
-            func =  Funcion(lexema.lexema, nombredb.lexema, igualdb.lexema, nuevadb.lexema, creardb2.lexema, lexema.getFila(), lexema.getColumna())
-            return func
-    return None
-
-def operar_():
-    global instrucciones
-    temp_instrucciones = []
-    while True:
-        operacion = operar()
-
-        if operacion:
-            temp_instrucciones.append(operacion)
-
-        else:
-            break
-    instrucciones = temp_instrucciones
+        if lexema.lexema == 'CrearBD':  # Verificar si el lexema representa la creación de una base de datos
+            nombre_lexema = lista_lexemas.pop(0)  # Obtener el nombre de la base de datos
+            nombre = nombre_lexema.lexema if nombre_lexema else None
+            instruccion = CrearDB(nombre, lexema.getFila(), lexema.getColumna())
+            instrucciones.append(instruccion)
+        elif lexema.lexema == 'EliminarBD':  # Verificar si el lexema representa la eliminación de una base de datos
+            nombre_lexema = lista_lexemas.pop(0)  # Obtener el nombre de la base de datos
+            nombre = nombre_lexema.lexema if nombre_lexema else None
+            instruccion = EliminarDB(nombre, lexema.getFila(), lexema.getColumna())
+            instrucciones.append(instruccion)
+        elif lexema.lexema == 'CrearColeccion':  # Verificar si el lexema representa la creación de una colección
+            nombre_lexema = lista_lexemas.pop(0)  # Obtener el nombre de la colección
+            nombre = nombre_lexema.lexema if nombre_lexema else None
+            instruccion = CrearColeccion(nombre, lexema.getFila(), lexema.getColumna())
+            instrucciones.append(instruccion)
 
     return instrucciones
+
+
+
+
+
+def operar_():
+    return operar()
 
 def getErrores():
     global lista_errores
     return lista_errores
 
 
-instrucciones = intruccion("CrearDB ejemplo =  nueva CrearDB();   ")
 
 resultado_instrucciones = operar_()
 
-
 for respuesta in resultado_instrucciones:
-    print(respuesta.ejecutarT(None))
+    print(respuesta.ejecutarT())
+
+
+
+
+'''for respuesta in resultado_instrucciones:
+    print(respuesta.ejecutarT(None))'''

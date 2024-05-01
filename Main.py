@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
+import AnalizadorSintactico
+from Funciones import *
 
 #Variables para almacenar datos del archivo cargado
 archivo = ""
@@ -16,6 +18,7 @@ def abrir_archivo():
                 datos = file.read()  # Leer el contenido del archivo
                 texto.delete(1.0, tk.END)  # Limpiar el widget de texto
                 texto.insert(tk.END, datos)  # Insertar los datos en el widget de texto
+                AnalizadorSintactico.intruccion(datos)
         except Exception as e:
             print("Error al cargar archivo:", e)
 
@@ -59,6 +62,20 @@ def guardar_como():
 
 def cerrar_aplicacion():
     win.quit()
+
+
+def mostrar_resultados():
+    resultado_instrucciones = AnalizadorSintactico.operar_()
+
+    for instruccion in resultado_instrucciones:
+        if isinstance(instruccion, CrearDB):
+            print(instruccion.ejecutarT())
+        elif isinstance(instruccion, EliminarDB):
+            print(instruccion.ejecutarT())
+        elif isinstance(instruccion, CrearColeccion):
+            print(instruccion.ejecutarT())
+        else:
+            print("El resultado no es una instancia de CrearDB, EliminarDB o CrearColeccion:", instruccion)
 
 #Parte de Tkinter
 win = tk.Tk()
@@ -105,7 +122,24 @@ scrollbar.pack(side="right", fill="y")
 texto.pack(side="left", fill="both", expand=True)
 texto.insert(tk.END, "--- Area de edicion de codigo\n")  # Insertar los datos en el widget de texto
 
+#! Pestaña de analizadores :/
 Analisis = ttk.Frame(pestanas)
+btn_traducir = ttk.Button(Analisis, text="Traducir", command=mostrar_resultados)
+btn_traducir.place(x=10, y=10)
+
+# Crear un Text debajo de los botones
+texto_frame2 = tk.Frame(Analisis)
+texto_frame2.place(x=10, y=50, relwidth=1, relheight=0.8)
+
+
+texto2 = tk.Text(texto_frame2, bg="white", bd=0, wrap="word")
+scrollbar2 = ttk.Scrollbar(texto_frame2, orient="vertical", command=texto2.yview)
+texto2.configure(yscrollcommand=scrollbar2.set)
+
+scrollbar2.pack(side="right", fill="y")
+texto2.pack(side="left", fill="both", expand=True)
+texto2.insert(tk.END, "--- Aqui se mostrara el texto traducido :) ---\n")
+
 
 pestanas.add(Archivo, text='Archivo')
 pestanas.add(Analisis, text='Analisis')
