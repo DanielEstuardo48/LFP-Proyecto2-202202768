@@ -41,7 +41,7 @@ class EliminarDB(Expression):
 
     def ejecutarT(self):
         if self.nombre is not None:
-            return 'db.dropDatabase()'
+            return 'db.dropDatabase();'
         else:
             return 'Error: Falta el nombre de la base de datos'
 

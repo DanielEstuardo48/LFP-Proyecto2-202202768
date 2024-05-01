@@ -1,7 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
+import webbrowser
 import AnalizadorSintactico
+import AnalizadosLexico
 from Funciones import *
+
+
 
 #Variables para almacenar datos del archivo cargado
 archivo = ""
@@ -9,13 +13,25 @@ datos = ""
 
 #Parte del codigo de funciones
 def abrir_archivo():
-    global archivo
+    global archivo, tokens_validos, tokens_no_validos
     archivo = filedialog.askopenfilename(initialdir="C:/Users/danis/OneDrive/Documents/Quinto Semestre/LFP/[LFP]Proyecto2", title="Explorador")
     if archivo:
         try:
             with open(archivo, 'r', encoding='utf-8') as file:
                 global datos
                 datos = file.read()  # Leer el contenido del archivo
+
+                # Conecta con el analizador léxico
+                tokens_validos, tokens_no_validos = AnalizadosLexico.analizador_lexico(datos)
+                # Imprime los tokens válidos y no válidos (puedes modificar esto según tus necesidades)
+                print("Tokens válidos:")
+                for token in tokens_validos:
+                    print(token)
+
+                print("\nTokens no válidos:")
+                for token in tokens_no_validos:
+                    print(token)
+
                 texto.delete(1.0, tk.END)  # Limpiar el widget de texto
                 texto.insert(tk.END, datos)  # Insertar los datos en el widget de texto
                 AnalizadorSintactico.intruccion(datos)
@@ -66,18 +82,58 @@ def cerrar_aplicacion():
 
 def mostrar_resultados():
     resultado_instrucciones = AnalizadorSintactico.operar_()
-
+    
+    # Limpiar el contenido actual del Text widget
+    texto2.delete(1.0, tk.END)
+    
+    # Definir el ancho de cada columna
+    ancho_col1 = 15
+    ancho_col2 = 20
+    ancho_col3 = 100
+    
+    # Crear las líneas de la tabla
+    lineas_tabla = []
+    lineas_tabla.append(f"{'Tipo Funcion':<{ancho_col1}}{'Funcion Mongo DB':<{ancho_col2}}{'Salida Final':<{ancho_col3}}\n")  # Encabezado de la tabla
+    
     for instruccion in resultado_instrucciones:
+        tipo_funcion = ""
+        funcion_mongo_db = ""
+        salida_final = ""
+        
         if isinstance(instruccion, CrearDB):
-            print(instruccion.ejecutarT())
+            tipo_funcion = "CrearDB"
+            funcion_mongo_db = "use"
+            salida_final = instruccion.ejecutarT()
         elif isinstance(instruccion, EliminarDB):
-            print(instruccion.ejecutarT())
+            tipo_funcion = "EliminarDB"
+            funcion_mongo_db = "dropDataBase"
+            salida_final = instruccion.ejecutarT()
         elif isinstance(instruccion, CrearColeccion):
-            print(instruccion.ejecutarT())
+            tipo_funcion = "CrearColeccion"
+            funcion_mongo_db = "createCollection"
+            salida_final = instruccion.ejecutarT()
         else:
             print("El resultado no es una instancia de CrearDB, EliminarDB o CrearColeccion:", instruccion)
+        
+        # Agregar la línea a la tabla
+        lineas_tabla.append(f"{tipo_funcion:<{ancho_col1}}{funcion_mongo_db:<{ancho_col2}}{salida_final:<{ancho_col3}}\n")
 
-#Parte de Tkinter
+    # Mostrar la tabla en el Text widget
+    texto2.insert(tk.END, ''.join(lineas_tabla))
+
+    # Configurar un Scrollbar horizontal
+    scrollbar_horizontal = ttk.Scrollbar(texto_frame2, orient='horizontal', command=texto2.xview)
+    texto2.configure(xscrollcommand=scrollbar_horizontal.set)
+    scrollbar_horizontal.pack(side='bottom', fill='x')
+
+def tablas():
+    AnalizadosLexico.generar_tabla_html()
+    AnalizadosLexico.generar_archivo_html()
+    webbrowser.open("tabla_tokens.html")
+
+
+
+#------------------------------------------Parte de Tkinter-------------------------------------------------------------------
 win = tk.Tk()
 win.title('Menu Principal')
 window_width = 650  # Ancho de la ventana
@@ -126,6 +182,8 @@ texto.insert(tk.END, "--- Area de edicion de codigo\n")  # Insertar los datos en
 Analisis = ttk.Frame(pestanas)
 btn_traducir = ttk.Button(Analisis, text="Traducir", command=mostrar_resultados)
 btn_traducir.place(x=10, y=10)
+btn_tablas = ttk.Button(Analisis, text="Ver tokends", command=tablas)
+btn_tablas.place(x=btn_traducir.winfo_reqwidth() + 475, y=10)
 
 # Crear un Text debajo de los botones
 texto_frame2 = tk.Frame(Analisis)

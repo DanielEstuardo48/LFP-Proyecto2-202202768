@@ -101,8 +101,8 @@ def operar():
             nombre = nombre_lexema.lexema if nombre_lexema else None
             instruccion = EliminarDB(nombre, lexema.getFila(), lexema.getColumna())
             instrucciones.append(instruccion)
-        elif lexema.lexema == 'CrearColeccion':  # Verificar si el lexema representa la creación de una colección
-            nombre_lexema = lista_lexemas.pop(0)  # Obtener el nombre de la colección
+        elif lexema.lexema == 'CrearColeccion': 
+            nombre_lexema = lista_lexemas.pop(0) 
             nombre = nombre_lexema.lexema if nombre_lexema else None
             instruccion = CrearColeccion(nombre, lexema.getFila(), lexema.getColumna())
             instrucciones.append(instruccion)
