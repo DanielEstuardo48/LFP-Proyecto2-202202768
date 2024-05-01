@@ -1,7 +1,66 @@
 import tkinter as tk
-from tkinter import ttk
-#from Estilos import *
+from tkinter import ttk, filedialog
 
+#Variables para almacenar datos del archivo cargado
+archivo = ""
+datos = ""
+
+#Parte del codigo de funciones
+def abrir_archivo():
+    global archivo
+    archivo = filedialog.askopenfilename(initialdir="C:/Users/danis/OneDrive/Documents/Quinto Semestre/LFP/[LFP]Proyecto2", title="Explorador")
+    if archivo:
+        try:
+            with open(archivo, 'r', encoding='utf-8') as file:
+                global datos
+                datos = file.read()  # Leer el contenido del archivo
+                texto.delete(1.0, tk.END)  # Limpiar el widget de texto
+                texto.insert(tk.END, datos)  # Insertar los datos en el widget de texto
+        except Exception as e:
+            print("Error al cargar archivo:", e)
+
+def guardar_archivo():
+    global archivo
+    if archivo:
+        try:
+            with open(archivo, 'w', encoding='utf-8') as file:
+                contenido = texto.get(1.0, tk.END)
+                file.write(contenido)
+            print("Archivo guardado :)")
+            texto.delete(1.0, tk.END)
+            texto.insert(tk.END, "Archivo guardado :)")
+        except Exception as e:
+            texto.delete(1.0, tk.END)
+            texto.insert(tk.END, e)
+            print("Error al guardar el archivo :( :", e)
+    else:
+        texto.delete(1.0, tk.END)
+        texto.insert(tk.END, "No se ha cargado ningun archivo :v ")
+        print("No se ha cargado ningun archivo :v ")
+
+def limpiar_texto():
+    texto.delete(1.0, tk.END)
+
+def guardar_como():
+    global archivo
+    contenido = texto.get(1.0, tk.END)
+    archivo = filedialog.asksaveasfilename(defaultextension=".lfp", filetypes=[("Archivos de texto", "*.lfp"), ("Todos los archivos", "*.*")])
+    if archivo:
+        try:
+            with open(archivo, 'w', encoding='utf-8') as file:
+                file.write(contenido)
+            print("Archivo guardado exitosamente.")
+            texto.delete(1.0, tk.END)
+            texto.insert(tk.END, "Archivo guardado :)")
+        except Exception as e:
+            texto.delete(1.0, tk.END)
+            texto.insert(tk.END, e)
+            print("Error al guardar archivo:", e)
+
+def cerrar_aplicacion():
+    win.quit()
+
+#Parte de Tkinter
 win = tk.Tk()
 win.title('Menu Principal')
 window_width = 650  # Ancho de la ventana
@@ -23,8 +82,29 @@ pestanas = ttk.Notebook(win)
 
 # Pestaña de archivo
 Archivo = ttk.Frame(pestanas)
-btn_guardar = ttk.Button(Archivo, text="Guardar", style='Round.TButton')
-btn_guardar.pack()
+btn_abrir = ttk.Button(Archivo, text="Abrir", command=abrir_archivo)
+btn_abrir.place(x=10, y=10)
+btn_guardar = ttk.Button(Archivo, text="Guardar", command=guardar_archivo)
+btn_guardar.place(x=btn_abrir.winfo_reqwidth() + 15, y=10)
+btn_nuevo = ttk.Button(Archivo, text="Nuevo", command=limpiar_texto)
+btn_nuevo.place(x=btn_guardar.winfo_reqwidth() + 95, y=10)
+btn_guardarc = ttk.Button(Archivo, text="Guardar como", command=guardar_como)
+btn_guardarc.place(x=btn_nuevo.winfo_reqwidth() + 175, y=10)
+btn_Salir = ttk.Button(Archivo, text="Salir", command=cerrar_aplicacion)
+btn_Salir.place(x=btn_guardar.winfo_reqwidth() + 475, y=10)
+# Crear un Text debajo de los botones
+texto_frame = tk.Frame(Archivo)
+texto_frame.place(x=10, y=50, relwidth=1, relheight=0.8)
+
+
+texto = tk.Text(texto_frame, bg="white", bd=0, wrap="word")
+scrollbar = ttk.Scrollbar(texto_frame, orient="vertical", command=texto.yview)
+texto.configure(yscrollcommand=scrollbar.set)
+
+scrollbar.pack(side="right", fill="y")
+texto.pack(side="left", fill="both", expand=True)
+texto.insert(tk.END, "--- Area de edicion de codigo\n")  # Insertar los datos en el widget de texto
+
 Analisis = ttk.Frame(pestanas)
 
 pestanas.add(Archivo, text='Archivo')
